@@ -1,0 +1,76 @@
+body {
+  background: #f2f4f8;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 60px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 320px;
+}
+h1 {
+  color: #333;
+  font-size: 1.6em;
+  margin-bottom: 20px;
+}
+.port-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.port {
+  font-size: 2.8em;
+  color: #0070f3;
+  font-weight: 700;
+  font-family: ui-monospace, monospace;
+  user-select: all;
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #e6e8ee;
+  background: #f7f8fb;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+.icon-btn:hover {
+  background: #eef3ff;
+  transform: translateY(-1px);
+}
+.icon-btn.success {
+  background: #e8f9ef;
+  border-color: #b8e5c2;
+}
+.icon {
+  color: #1f3b77;
+}
+.hidden {
+  display: none;
+}
+.timer {
+  color: #555;
+  font-size: 1.1em;
+  margin-top: 15px;
+}
+.copied {
+  margin-top: 10px;
+  color: #2a8f4a;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.copied.visible {
+  opacity: 1;
+}

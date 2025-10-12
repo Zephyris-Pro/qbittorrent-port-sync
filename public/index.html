@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>qBittorrent P2P Port</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <svg
+      aria-hidden="true"
+      style="position: absolute; width: 0; height: 0; overflow: hidden"
+    >
+      <symbol id="icon-clipboard" viewBox="0 0 24 24">
+        <path
+          d="M9 3h6a2 2 0 0 1 2 2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1a2 2 0 0 1 2-2Zm0 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path
+          d="M20 6L9 17l-5-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </symbol>
+    </svg>
+
+    <div class="container">
+      <h1>qBittorrent P2P Port</h1>
+      <div class="port-container">
+        <div class="port" id="port">—</div>
+        <button class="icon-btn" id="copyBtn" title="Copier le port">
+          <svg class="icon is-copy" width="24" height="24">
+            <use href="#icon-clipboard"></use>
+          </svg>
+          <svg class="icon is-check hidden" width="24" height="24">
+            <use href="#icon-check"></use>
+          </svg>
+        </button>
+      </div>
+      <p class="timer">
+        Next update in <span id="countdown">—</span> s
+      </p>
+      <p id="copied-msg" class="copied">Port copied ✅</p>
+    </div>
+
+    <script>
+      const portElem = document.getElementById("port");
+      const countdown = document.getElementById("countdown");
+      const copyBtn = document.getElementById("copyBtn");
+      const copiedMsg = document.getElementById("copied-msg");
+      const iconCopy = copyBtn.querySelector(".is-copy");
+      const iconCheck = copyBtn.querySelector(".is-check");
+      let remaining = 0;
+
+      async function refresh() {
+        const res = await fetch("/status");
+        const data = await res.json();
+        portElem.textContent = data.current_port ?? "—";
+        remaining = data.next_update_in;
+      }
+
+      setInterval(async () => {
+        if (remaining > 0) remaining--;
+        else await refresh();
+        countdown.textContent = remaining;
+      }, 1000);
+
+      copyBtn.addEventListener("click", async () => {
+        const text = portElem.textContent.trim();
+        if (!text || text === "—") return;
+        await navigator.clipboard.writeText(text);
+        iconCopy.classList.add("hidden");
+        iconCheck.classList.remove("hidden");
+        copyBtn.classList.add("success");
+        copiedMsg.classList.add("visible");
+        setTimeout(() => {
+          iconCheck.classList.add("hidden");
+          iconCopy.classList.remove("hidden");
+          copyBtn.classList.remove("success");
+          copiedMsg.classList.remove("visible");
+        }, 1200);
+      });
+
+      refresh();
+    </script>
+  </body>
+</html>
