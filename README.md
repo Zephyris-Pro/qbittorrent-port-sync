@@ -1,13 +1,15 @@
-# qBittorrent VPN Port Updater
+# qBittorrent Port Sync
 
 Small Node.js service that periodically reads the VPN-forwarded port from a Gluetun control server and updates qBittorrent’s listening port via its Web API.
 
 ## Files
+
 - Dockerfile — builds the runtime image
 - docker-compose-example.yml — sample Compose service
 - .env.example — template for configuration
 
 ## Build the image
+
 - Linux/macOS:
   ```
   (sudo) docker build -t qbittorrent-p2p-port-updater:latest .
@@ -18,6 +20,7 @@ Small Node.js service that periodically reads the VPN-forwarded port from a Glue
   ```
 
 ## Configure environment
+
 Create a .env from the example and edit values.
 
 - Linux/macOS:
@@ -32,14 +35,17 @@ Create a .env from the example and edit values.
   ```
 
 Important:
+
 - The image exposes port 5000 and the example compose maps 5000:5000.
 - Either set SERVER_PORT=5000 in .env, or change the compose mapping to 5050:5050 if you keep SERVER_PORT=5050.
 
 If running Gluetun/qBittorrent in Docker, do not use localhost inside the container. Prefer service names, for example:
+
 - GLUETUN_SERVER_URL=http://gluetun:8000/v1/openvpn/portforwarded
 - QBITTORRENT_URL=http://qbittorrent:8080
 
 ## Run with Docker Compose
+
 - Start:
   ```
   docker compose -f docker-compose-example.yml up -d
@@ -54,6 +60,7 @@ If running Gluetun/qBittorrent in Docker, do not use localhost inside the contai
   ```
 
 ## Quick checks
+
 - Gluetun control server (adjust host/port if needed):
   ```
   curl http://localhost:8000/v1/openvpn/portforwarded
@@ -64,6 +71,7 @@ If running Gluetun/qBittorrent in Docker, do not use localhost inside the contai
   ```
 
 ## Troubleshooting
+
 - Port mismatch: align SERVER_PORT with the Compose port mapping.
 - Connectivity: from the updater container, ensure it can reach GLUETUN_SERVER_URL and QBITTORRENT_URL (avoid localhost; use service names on the same Docker network).
 - Auth: verify QBITTORRENT_USER/PASS and that the Web UI is enabled.

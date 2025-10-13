@@ -1,7 +1,7 @@
 services:
-  qbittorrent-p2p-port-updater-server:
+  qbittorrent-port-sync:
     container_name: server
-    image: qbittorrent-p2p-port-updater:latest
+    image: qbittorrent-port-sync:latest
     restart: unless-stopped
     ports:
       - 5000:5000

@@ -2,7 +2,8 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>qBittorrent P2P Port</title>
+    <title>qBittorrent Port Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
@@ -30,10 +31,53 @@
           stroke-linejoin="round"
         />
       </symbol>
+      <!-- Theme icons -->
+      <symbol id="icon-sun" viewBox="0 0 24 24">
+        <circle
+          cx="12"
+          cy="12"
+          r="4.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+        <path
+          d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24">
+        <path
+          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </symbol>
     </svg>
 
     <div class="container">
-      <h1>qBittorrent P2P Port</h1>
+      <!-- Theme toggle -->
+      <button
+        class="icon-btn theme-toggle"
+        id="themeToggle"
+        title="Changer le thème"
+        aria-label="Changer le thème"
+      >
+        <svg class="icon is-sun hidden" width="22" height="22">
+          <use href="#icon-sun"></use>
+        </svg>
+        <svg class="icon is-moon hidden" width="22" height="22">
+          <use href="#icon-moon"></use>
+        </svg>
+      </button>
+
+      <h1>qBittorrent Port Sync</h1>
       <div class="port-container">
         <div class="port" id="port">—</div>
         <button class="icon-btn" id="copyBtn" title="Copier le port">
@@ -45,9 +89,7 @@
           </svg>
         </button>
       </div>
-      <p class="timer">
-        Next update in <span id="countdown">—</span> s
-      </p>
+      <p class="timer">Next update in <span id="countdown">—</span> s</p>
       <p id="copied-msg" class="copied">Port copied ✅</p>
     </div>
 
@@ -58,6 +100,50 @@
       const copiedMsg = document.getElementById("copied-msg");
       const iconCopy = copyBtn.querySelector(".is-copy");
       const iconCheck = copyBtn.querySelector(".is-check");
+
+      const themeToggle = document.getElementById("themeToggle");
+      const sunIcon = themeToggle.querySelector(".is-sun");
+      const moonIcon = themeToggle.querySelector(".is-moon");
+      const storageKey = "theme";
+      const mqlDark = window.matchMedia("(prefers-color-scheme: dark)");
+      let isAuto = false;
+
+      function setTheme(theme, persist) {
+        document.documentElement.setAttribute("data-theme", theme);
+        if (theme === "dark") {
+          sunIcon.classList.remove("hidden");
+          moonIcon.classList.add("hidden");
+        } else {
+          sunIcon.classList.add("hidden");
+          moonIcon.classList.remove("hidden");
+        }
+        if (persist) localStorage.setItem(storageKey, theme);
+      }
+
+      function initTheme() {
+        const stored = localStorage.getItem(storageKey);
+        if (stored === "light" || stored === "dark") {
+          isAuto = false;
+          setTheme(stored, false);
+        } else {
+          isAuto = true;
+          setTheme(mqlDark.matches ? "dark" : "light", false);
+        }
+      }
+
+      initTheme();
+
+      mqlDark.addEventListener("change", (e) => {
+        if (isAuto) setTheme(e.matches ? "dark" : "light", false);
+      });
+
+      themeToggle.addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme");
+        const next = current === "dark" ? "light" : "dark";
+        isAuto = false;
+        setTheme(next, true);
+      });
+
       let remaining = 0;
 
       async function refresh() {
