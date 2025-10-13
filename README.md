@@ -75,3 +75,10 @@ If running Gluetun/qBittorrent in Docker, do not use localhost inside the contai
 - Port mismatch: align SERVER_PORT with the Compose port mapping.
 - Connectivity: from the updater container, ensure it can reach GLUETUN_SERVER_URL and QBITTORRENT_URL (avoid localhost; use service names on the same Docker network).
 - Auth: verify QBITTORRENT_USER/PASS and that the Web UI is enabled.
+
+## Screenshots
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/05de14cf-bea3-42f4-b407-7e6282124d65" style="width:48%; margin-right:1%;" />
+  <img src="https://github.com/user-attachments/assets/b0b8e28f-44a8-4571-841e-a67f3b49d6ef" style="width:48%;" />
+</p>
+
