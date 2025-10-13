@@ -49,7 +49,10 @@ async function loginQbit() {
   try {
     const res = await fetchSession(`${QBITTORRENT_URL}/api/v2/auth/login`, {
       method: "POST",
-      body: new URLSearchParams({ username: QBITTORRENT_USER, password: QBITTORRENT_PASS }),
+      body: new URLSearchParams({
+        username: QBITTORRENT_USER,
+        password: QBITTORRENT_PASS,
+      }),
     });
     const text = await res.text();
     return text.trim() === "Ok.";
@@ -60,10 +63,14 @@ async function loginQbit() {
 
 async function updateQbitPort(port) {
   try {
-    let prefsRes = await fetchSession(`${QBITTORRENT_URL}/api/v2/app/preferences`);
+    let prefsRes = await fetchSession(
+      `${QBITTORRENT_URL}/api/v2/app/preferences`
+    );
     if (prefsRes.status === 403) {
       await loginQbit();
-      prefsRes = await fetchSession(`${QBITTORRENT_URL}/api/v2/app/preferences`);
+      prefsRes = await fetchSession(
+        `${QBITTORRENT_URL}/api/v2/app/preferences`
+      );
     }
     const prefs = await prefsRes.json();
     prefs.listen_port = port;
@@ -102,4 +109,3 @@ app.get("/status", (_, res) => {
 app.listen(5000, "0.0.0.0", () =>
   console.log(`🌐 Serving on http://localhost:5000`)
 );
-  

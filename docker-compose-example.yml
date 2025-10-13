@@ -1,0 +1,9 @@
+services:
+  qbittorrent-p2p-port-updater-server:
+    container_name: server
+    image: qbittorrent-p2p-port-updater:latest
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    env_file:
+      - .env
