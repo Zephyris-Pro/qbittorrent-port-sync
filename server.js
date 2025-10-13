@@ -17,9 +17,9 @@ const CookieJar = tough.CookieJar;
 const VPN_PORT_URL =
   process.env.GLUETUN_SERVER_URL ||
   "http://localhost:8000/v1/openvpn/portforwarded";
-const QBIT_URL = process.env.QBIT_URL || "http://localhost:8080";
-const QBIT_USER = process.env.QBIT_USER || "";
-const QBIT_PASS = process.env.QBIT_PASS || "";
+const QBITTORRENT_URL = process.env.QBITTORRENT_URL || "http://localhost:8080";
+const QBITTORRENT_USER = process.env.QBITTORRENT_USER || "";
+const QBITTORRENT_PASS = process.env.QBITTORRENT_PASS || "";
 const UPDATE_INTERVAL = Number(process.env.UPDATE_INTERVAL || 300_000);
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,9 +47,9 @@ async function getVPNPort() {
 
 async function loginQbit() {
   try {
-    const res = await fetchSession(`${QBIT_URL}/api/v2/auth/login`, {
+    const res = await fetchSession(`${QBITTORRENT_URL}/api/v2/auth/login`, {
       method: "POST",
-      body: new URLSearchParams({ username: QBIT_USER, password: QBIT_PASS }),
+      body: new URLSearchParams({ username: QBITTORRENT_USER, password: QBITTORRENT_PASS }),
     });
     const text = await res.text();
     return text.trim() === "Ok.";
@@ -60,14 +60,14 @@ async function loginQbit() {
 
 async function updateQbitPort(port) {
   try {
-    let prefsRes = await fetchSession(`${QBIT_URL}/api/v2/app/preferences`);
+    let prefsRes = await fetchSession(`${QBITTORRENT_URL}/api/v2/app/preferences`);
     if (prefsRes.status === 403) {
       await loginQbit();
-      prefsRes = await fetchSession(`${QBIT_URL}/api/v2/app/preferences`);
+      prefsRes = await fetchSession(`${QBITTORRENT_URL}/api/v2/app/preferences`);
     }
     const prefs = await prefsRes.json();
     prefs.listen_port = port;
-    await fetchSession(`${QBIT_URL}/api/v2/app/setPreferences`, {
+    await fetchSession(`${QBITTORRENT_URL}/api/v2/app/setPreferences`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: "json=" + encodeURIComponent(JSON.stringify(prefs)),
@@ -83,6 +83,7 @@ async function updatePort() {
   if (!port) return;
   lastPort = port;
   lastUpdate = Date.now();
+  if (port === lastPort) return;
   await updateQbitPort(port);
 }
 
@@ -92,7 +93,7 @@ async function updatePort() {
   setInterval(updatePort, UPDATE_INTERVAL);
 })();
 
-app.get("/status", (req, res) => {
+app.get("/status", (_, res) => {
   const elapsed = (Date.now() - lastUpdate) / 1000;
   const remaining = Math.max(0, UPDATE_INTERVAL / 1000 - elapsed);
   res.json({ current_port: lastPort, next_update_in: Math.round(remaining) });
