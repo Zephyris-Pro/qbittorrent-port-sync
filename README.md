@@ -12,11 +12,11 @@ Small Node.js service that periodically reads the VPN-forwarded port from a Glue
 
 - Linux/macOS:
   ```
-  (sudo) docker build -t qbittorrent-p2p-port-updater:latest .
+  (sudo) docker build -t qbittorrent-port-sync:latest .
   ```
 - Windows PowerShell:
   ```
-  docker build -t qbittorrent-p2p-port-updater:latest .
+  docker build -t qbittorrent-port-sync:latest .
   ```
 
 ## Configure environment

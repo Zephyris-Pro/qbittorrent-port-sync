@@ -31,6 +31,25 @@
           stroke-linejoin="round"
         />
       </symbol>
+      <!-- Add refresh icon -->
+      <symbol id="icon-refresh" viewBox="0 0 24 24">
+        <path
+          d="M23 4v6h-6M1 20v-6h6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </symbol>
       <!-- Theme icons -->
       <symbol id="icon-sun" viewBox="0 0 24 24">
         <circle
@@ -81,22 +100,34 @@
       <div class="port-container">
         <div class="port" id="port">—</div>
         <button class="icon-btn" id="copyBtn" title="Copier le port">
-          <svg class="icon is-copy" width="24" height="24">
+          <svg class="icon is-copy" width="22" height="22">
             <use href="#icon-clipboard"></use>
           </svg>
-          <svg class="icon is-check hidden" width="24" height="24">
+          <svg class="icon is-check hidden" width="22" height="22">
             <use href="#icon-check"></use>
           </svg>
         </button>
       </div>
       <p class="timer">Next update in <span id="countdown">—</span> s</p>
       <p id="copied-msg" class="copied">Port copied ✅</p>
+
+      <button
+        class="icon-btn refresh-btn"
+        id="refreshBtn"
+        title="Force refresh"
+        aria-label="Force refresh"
+      >
+        <svg class="icon" width="22" height="22">
+          <use href="#icon-refresh"></use>
+        </svg>
+      </button>
     </div>
 
     <script>
       const portElem = document.getElementById("port");
       const countdown = document.getElementById("countdown");
       const copyBtn = document.getElementById("copyBtn");
+      const refreshBtn = document.getElementById("refreshBtn");
       const copiedMsg = document.getElementById("copied-msg");
       const iconCopy = copyBtn.querySelector(".is-copy");
       const iconCheck = copyBtn.querySelector(".is-check");
@@ -153,6 +184,30 @@
         remaining = data.next_update_in;
       }
 
+      async function forceRefresh() {
+        try {
+          refreshBtn.classList.add("refreshing");
+
+          await fetch("/force-update");
+
+          await refresh();
+
+          copiedMsg.textContent = "Port refreshed ✅";
+          copiedMsg.classList.add("visible");
+
+          setTimeout(() => {
+            copiedMsg.classList.remove("visible");
+            setTimeout(() => {
+              copiedMsg.textContent = "Port copied ✅";
+            }, 300);
+          }, 1500);
+        } catch (error) {
+          console.error("Failed to force refresh:", error);
+        } finally {
+          refreshBtn.classList.remove("refreshing");
+        }
+      }
+
       setInterval(async () => {
         if (remaining > 0) remaining--;
         else await refresh();
@@ -175,7 +230,21 @@
         }, 1200);
       });
 
+      refreshBtn.addEventListener("click", forceRefresh);
+
       refresh();
+
+      document.head.insertAdjacentHTML(
+        "beforeend",
+        `<style>
+          @keyframes spin {
+            100% { transform: rotate(360deg); }
+          }
+          .refresh-btn.refreshing svg {
+            animation: spin 1s linear infinite;
+          }
+        </style>`
+      );
     </script>
   </body>
 </html>
