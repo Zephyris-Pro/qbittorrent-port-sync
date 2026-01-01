@@ -41,7 +41,7 @@ Important:
 
 If running Gluetun/qBittorrent in Docker, do not use localhost inside the container. Prefer service names, for example:
 
-- GLUETUN_SERVER_URL=http://gluetun:8000/v1/openvpn/portforwarded
+- GLUETUN_SERVER_URL=http://gluetun:8000/v1/portforwarded
 - QBITTORRENT_URL=http://qbittorrent:8080
 
 ## Run with Docker Compose

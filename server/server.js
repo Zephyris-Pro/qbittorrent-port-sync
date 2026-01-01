@@ -16,17 +16,22 @@ const CookieJar = tough.CookieJar;
 const SERVER_PORT = 5000;
 const VPN_PORT_URL =
   process.env.GLUETUN_SERVER_URL ||
-  "http://localhost:8000/v1/openvpn/portforwarded";
+  "http://localhost:8000/v1/portforward";
 const QBITTORRENT_URL = process.env.QBITTORRENT_URL || "http://localhost:8080";
 const QBITTORRENT_USER = process.env.QBITTORRENT_USER || "";
 const QBITTORRENT_PASS = process.env.QBITTORRENT_PASS || "";
 const UPDATE_INTERVAL = Number(process.env.UPDATE_INTERVAL || 300_000);
 
+const GLUETUN_AUTH_METHOD = (process.env.GLUETUN_AUTH_METHOD || "none").toLowerCase();
+const GLUETUN_AUTH_USERNAME = process.env.GLUETUN_AUTH_USERNAME || "";
+const GLUETUN_AUTH_PASSWORD = process.env.GLUETUN_AUTH_PASSWORD || "";
+const GLUETUN_AUTH_API_KEY = process.env.GLUETUN_AUTH_API_KEY || "";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 app.use(express.json());
 
 const jar = new CookieJar();
@@ -37,9 +42,41 @@ let lastCheckTime = Date.now();
 let isLoggedIn = false;
 let updateCount = 0;
 
+function buildGluetunAuthHeaders() {
+  const headers = {};
+  switch (GLUETUN_AUTH_METHOD) {
+    case "basic":
+      if (!GLUETUN_AUTH_USERNAME || !GLUETUN_AUTH_PASSWORD) {
+        console.warn("⚠️ Gluetun basic auth configured without username/password");
+        break;
+      }
+      headers.Authorization = `Basic ${Buffer.from(`${GLUETUN_AUTH_USERNAME}:${GLUETUN_AUTH_PASSWORD}`).toString("base64")}`;
+      break;
+    case "apikey":
+      if (!GLUETUN_AUTH_API_KEY) {
+        console.warn("⚠️ Gluetun API key auth configured without apikey");
+        break;
+      }
+      headers["X-API-Key"] = GLUETUN_AUTH_API_KEY;
+      break;
+    case "none":
+      break;
+    default:
+      console.warn(`⚠️ Unknown Gluetun auth method "${GLUETUN_AUTH_METHOD}", falling back to none`);
+  }
+  return headers;
+}
+
 async function getVPNPort() {
   try {
-    const r = await fetch(VPN_PORT_URL, { timeout: 5000 });
+    const r = await fetch(VPN_PORT_URL, {
+      timeout: 5000,
+      headers: buildGluetunAuthHeaders(),
+    });
+    if (r.status === 401 || r.status === 403) {
+      console.error(`❌ Gluetun authentication failed with status ${r.status}`);
+      return null;
+    }
     if (!r.ok) {
       console.error(`❌ Gluetun returned status ${r.status}`);
       return null;
@@ -206,6 +243,7 @@ function setupGracefulShutdown() {
   console.log(`🌐 qBittorrent: ${QBITTORRENT_URL}`);
   console.log(`⏱️ Update interval: ${UPDATE_INTERVAL / 1000}s`);
   console.log(`🔌 Server port: ${SERVER_PORT}`);
+  console.log(`🔐 Gluetun auth: ${GLUETUN_AUTH_METHOD}`);
 
   setupGracefulShutdown();
 
